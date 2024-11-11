@@ -3,7 +3,8 @@ package com.example.marvelapp.home.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.domain.model.MarvelCharacterResponse
+import com.example.domain.model.BaseResponse
+import com.example.domain.model.MarvelCharacter
 import com.example.domain.usecase.GetMarvelCharactersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +19,8 @@ class MarvelCharactersViewModel @Inject constructor(
     private val getMarvelCharactersUseCase: GetMarvelCharactersUseCase
 ): ViewModel() {
 
-    private val _marvelCharacters: MutableStateFlow<MarvelCharacterResponse?> = MutableStateFlow(null)
-    val marvelCharacters: StateFlow<MarvelCharacterResponse?> = _marvelCharacters
+    private val _marvelCharacters: MutableStateFlow<BaseResponse<MarvelCharacter>?> = MutableStateFlow(null)
+    val marvelCharacters: StateFlow<BaseResponse<MarvelCharacter>?> = _marvelCharacters
 
     fun getMarvelCharacters(){
         viewModelScope.launch{

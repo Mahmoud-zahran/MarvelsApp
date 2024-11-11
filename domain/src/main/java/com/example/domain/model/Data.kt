@@ -1,9 +1,9 @@
 package com.example.domain.model
 
-data class Data(
+data class Data<T>(
     val count: Int,
     val limit: Int,
     val offset: Int,
-    val results: List<Result>,
+    val results: List<T>,
     val total: Int
 )

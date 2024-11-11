@@ -1,6 +1,6 @@
 package com.example.domain.model
 
-data class Result(
+data class MarvelCharacter(
     val comics: Comics,
     val description: String,
     val events: Events,

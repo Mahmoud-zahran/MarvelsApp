@@ -24,12 +24,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.domain.model.Result
+import com.example.domain.model.MarvelCharacter
 import com.example.marvelapp.R
 
 @Composable
 fun MarvelCharacterListScreen(
-    marvelCharacters: List<Result>,
+    marvelCharacters: List<MarvelCharacter>,
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
@@ -53,7 +53,7 @@ fun MarvelCharacterListScreen(
 
 @Composable
 fun ImageWithTextOverlay(
-    marvelCharacter: Result,
+    marvelCharacter: MarvelCharacter,
     modifier: Modifier = Modifier
 ) {
 
