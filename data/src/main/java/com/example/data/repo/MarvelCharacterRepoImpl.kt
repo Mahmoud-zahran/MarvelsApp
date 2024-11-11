@@ -5,5 +5,5 @@ import com.example.domain.model.MarvelCharacterResponse
 import com.example.domain.repo.MarvelCharactersRepo
 
 class MarvelCharacterRepoImpl(private val apiService: ApiService):MarvelCharactersRepo {
-    override fun getMarvelCharactersFromRemote(): MarvelCharacterResponse = apiService.getMarvelCharacters()
+    override suspend fun getMarvelCharactersFromRemote(): MarvelCharacterResponse = apiService.getMarvelCharacters()
 }

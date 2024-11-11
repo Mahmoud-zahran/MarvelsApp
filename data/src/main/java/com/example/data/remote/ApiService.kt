@@ -6,5 +6,5 @@ import retrofit2.http.GET
 interface ApiService {
 //    get /v1/public/characters
 @GET("characters")
-fun getMarvelCharacters(): MarvelCharacterResponse
+suspend fun getMarvelCharacters(): MarvelCharacterResponse
 }

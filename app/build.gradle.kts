@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.marvelapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.marvelapp"
@@ -51,6 +51,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    kapt {
+        correctErrorTypes = true // Helps with annotation errors
+    }
 //    viewBinding {
 //        enabled = true
 //    }
@@ -73,6 +76,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.material3.window.sizeclass)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -95,6 +99,8 @@ dependencies {
     // Glide
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
+    //Coil
+    implementation(libs.coil.compose)
     implementation(project(":domain"))
     implementation (project(":data"))
 }
