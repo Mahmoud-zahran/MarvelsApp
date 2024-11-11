@@ -99,8 +99,11 @@ dependencies {
     // Glide
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    //Coil
+    // Coil
     implementation(libs.coil.compose)
+    // navigation compose
+    implementation(libs.androidx.navigation.compose)
+
     implementation(project(":domain"))
     implementation (project(":data"))
 }
