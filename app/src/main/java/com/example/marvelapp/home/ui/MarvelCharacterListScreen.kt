@@ -42,7 +42,7 @@ fun MarvelCharacterListScreen(
                     .fillMaxWidth()
 //                    .padding(8.dp)
                     .clickable {
-                        navController.navigate("characterDetail/${character.id}")
+                        navController.navigate("character_details/${character.id}")
                     }
             ) {
                 ImageWithTextOverlay(character)

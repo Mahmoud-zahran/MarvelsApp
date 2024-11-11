@@ -18,6 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.marvelapp.ui.theme.MarvelAppTheme
 import com.example.marvelapp.home.viewmodel.MarvelCharactersViewModel
 
@@ -29,24 +35,60 @@ fun MarvelAppScreen(
     navController: NavController
 ) {
     val marvelCharactersState = viewModel.marvelCharacters.collectAsState(initial = null)
+    // Get the current navigation destination
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     MarvelAppTheme {
         Scaffold(
-            topBar = { MarvelTopBar() }
+            topBar = {
+                if (currentDestination != "character_details/{characterId}") {
+                    MarvelTopBar()
+                }
+            }
         ) { padding ->
             marvelCharactersState.value?.let { marvelCharacterResponse ->
                 if (marvelCharacterResponse.data.results.isNotEmpty()) {
                     val characters = marvelCharacterResponse.data.results
-                    when (windowSize.widthSizeClass) {
-                        WindowWidthSizeClass.Compact, WindowWidthSizeClass.Expanded -> {
+                    // Setting up NavHost for navigation
+                    NavHost(
+                        navController = navController as NavHostController,
+                        startDestination = "home"
+                    ) {
+                        composable("home") {
                             MarvelCharacterListScreen(
-
                                 marvelCharacters = characters,
                                 navController = navController,
-                                modifier = Modifier.fillMaxSize().padding(padding)
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(padding)
                             )
                         }
+                        composable(
+                            "character_details/{characterId}",
+                            arguments = listOf(navArgument("characterId") {
+                                type = NavType.IntType
+                            })
+                        ) { backStackEntry ->
+                            val characterId = backStackEntry.arguments?.getInt("characterId") ?: 0
+                            val character = characters.firstOrNull { it.id == characterId }
+                            character?.let {
+                                MarvelCharacterDetailsScreen(
+                                    marvelCharacter = it,
+                                    navController = navController
+                                )
+                            }
+                        }
                     }
+//                    when (windowSize.widthSizeClass) {
+//                        WindowWidthSizeClass.Compact, WindowWidthSizeClass.Expanded -> {
+//                            MarvelCharacterListScreen(
+//
+//                                marvelCharacters = characters,
+//                                navController = navController,
+//                                modifier = Modifier.fillMaxSize().padding(padding)
+//                            )
+//                        }
+//                    }
                 } else {
                     // Handle empty list case with a centered message
                     Box(
