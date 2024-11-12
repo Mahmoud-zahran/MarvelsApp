@@ -72,9 +72,9 @@ fun MarvelAppScreen(
                             val characterId = backStackEntry.arguments?.getInt("characterId") ?: 0
                             val character = characters.firstOrNull { it.id == characterId }
                             character?.let {
-                                MarvelCharacterDetailsScreen(
+                                MarvelCharacterDetailsScreen(it.id,
                                     marvelCharacter = it,
-                                    navController = navController
+                                    navController = navController, viewModel = viewModel
                                 )
                             }
                         }
