@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,17 +23,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import coil.ImageLoader
 import com.example.marvelapp.ui.theme.MarvelAppTheme
 import com.example.marvelapp.home.viewmodel.MarvelCharactersViewModel
+import com.example.marvelapp.home.viewmodel.MarvelSubItemViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun MarvelAppScreen(
-    viewModel: MarvelCharactersViewModel = viewModel(),
+    marvelCharactersViewModel: MarvelCharactersViewModel = viewModel(),
+    marvelSubItemViewModel: MarvelSubItemViewModel = viewModel(),
+    imageLoader: ImageLoader,
     windowSize: WindowSizeClass,
     navController: NavController
 ) {
-    val marvelCharactersState = viewModel.marvelCharacters.collectAsState(initial = null)
+    val marvelCharactersState = marvelCharactersViewModel.marvelCharacters.collectAsState(initial = null)
     // Get the current navigation destination
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -73,7 +76,8 @@ fun MarvelAppScreen(
                             val character = characters.firstOrNull { it.id == characterId }
                             character?.let {
                                 MarvelCharacterDetailsScreen(
-                                    marvelCharacter = it,
+                                    marvelSubItemViewModel,
+                                    marvelCharacter = it,imageLoader,
                                     navController = navController
                                 )
                             }
