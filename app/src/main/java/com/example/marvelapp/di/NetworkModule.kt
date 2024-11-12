@@ -17,22 +17,27 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    
+
     @Provides
     @Singleton
     fun provideApiKeyInterceptor(): ApiKeyInterceptor {
-        return ApiKeyInterceptor("4774bfec58cde4aa80c575a69fc7b45c","ccacb206275a6af86617290e8beb013c2aa7e9d6")
+        return ApiKeyInterceptor(
+            "4774bfec58cde4aa80c575a69fc7b45c",
+            "ccacb206275a6af86617290e8beb013c2aa7e9d6"
+        )
     }
 
     @Provides
     @Singleton
     fun provideOkHttp(apiKeyInterceptor: ApiKeyInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS) // Increase connection timeout
+            .readTimeout(30, TimeUnit.SECONDS)    // Increase read timeout
+            .writeTimeout(30, TimeUnit.SECONDS)   // Increase write timeout
             .addInterceptor(apiKeyInterceptor) // Use the injected com.example.marvelapp.di.ApiKeyInterceptor
             .build()
     }
+
     @Provides
     @Singleton
     fun provideImageLoader(
@@ -43,6 +48,7 @@ object NetworkModule {
             .okHttpClient { okHttpClient }
             .build()
     }
+
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
@@ -52,6 +58,7 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+
     @Provides
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService {
