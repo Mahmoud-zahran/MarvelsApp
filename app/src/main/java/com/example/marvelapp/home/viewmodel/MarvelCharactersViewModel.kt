@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.domain.model.Result
 
 const val TAG ="MarvelCharactersViewModel"
 
@@ -23,37 +24,69 @@ class MarvelCharactersViewModel @Inject constructor(
     private val fetchSectionDataUseCase: FetchSectionDataUseCase
 ): ViewModel() {
 
-    private val _marvelCharacters: MutableStateFlow<BaseResponse<MarvelCharacter>?> = MutableStateFlow(null)
-    val marvelCharacters: StateFlow<BaseResponse<MarvelCharacter>?> = _marvelCharacters
-    private val _comics = MutableStateFlow<BaseResponse<SectionItem>?>(null)
-    val comics: StateFlow<BaseResponse<SectionItem>?> = _comics
+    private val _marvelCharacters: MutableStateFlow<Result<BaseResponse<MarvelCharacter>>?> = MutableStateFlow(null)
+    val marvelCharacters: StateFlow<Result<BaseResponse<MarvelCharacter>>?> = _marvelCharacters
+    private val _comics = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
+    val comics: StateFlow<Result<BaseResponse<SectionItem>>?> = _comics
 
-    private val _events = MutableStateFlow<BaseResponse<SectionItem>?>(null)
-    val events: StateFlow<BaseResponse<SectionItem>?> = _events
+    private val _events = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
+    val events: StateFlow<Result<BaseResponse<SectionItem>>?> = _events
 
-    private val _stories = MutableStateFlow<BaseResponse<SectionItem>?>(null)
-    val stories: StateFlow<BaseResponse<SectionItem>?> = _stories
+    private val _stories = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
+    val stories: StateFlow<Result<BaseResponse<SectionItem>>?> = _stories
 
-    private val _series = MutableStateFlow<BaseResponse<SectionItem>?>(null)
-    val series: StateFlow<BaseResponse<SectionItem>?> = _series
+    private val _series = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
+    val series: StateFlow<Result<BaseResponse<SectionItem>>?> = _series
 
     fun getMarvelCharacters(){
-        viewModelScope.launch{
+        viewModelScope.launch {
+            _marvelCharacters.value = Result.Loading  // Set loading state
             try {
-                _marvelCharacters.value = getMarvelCharactersUseCase()
-                Log.d(TAG, "getMarvelCharacters: "+_marvelCharacters.value.toString())
-            } catch (e: Exception){
-                Log.e(TAG, e.message.toString())
+                val result = getMarvelCharactersUseCase()
+                _marvelCharacters.value = result
+                Log.d(TAG, "getMarvelCharacters: $result")
+            } catch (e: Exception) {
+                _marvelCharacters.value = Result.Error("Failed to fetch characters", e)
+                Log.e(TAG, "getMarvelCharacters Error: ${e.message}")
             }
         }
     }
+
     fun fetchCharacterDetails(characterId: Int) {
         viewModelScope.launch {
-            _comics.value = fetchSectionDataUseCase(characterId,MarvelSectionType.COMIC)
-            _events.value = fetchSectionDataUseCase(characterId,MarvelSectionType.EVENT)
-            _stories.value = fetchSectionDataUseCase(characterId,MarvelSectionType.STORY)
-            _series.value = fetchSectionDataUseCase(characterId,MarvelSectionType.SERIES)
+            // Fetch comics
+            _comics.value = Result.Loading
+            _comics.value = try {
+                fetchSectionDataUseCase(characterId, MarvelSectionType.COMIC)
+            } catch (e: Exception) {
+                Result.Error("Failed to fetch comics", e)
+            }
+
+            // Fetch events
+            _events.value = Result.Loading
+            _events.value = try {
+                fetchSectionDataUseCase(characterId, MarvelSectionType.EVENT)
+            } catch (e: Exception) {
+                Result.Error("Failed to fetch events", e)
+            }
+
+            // Fetch stories
+            _stories.value = Result.Loading
+            _stories.value = try {
+                fetchSectionDataUseCase(characterId, MarvelSectionType.STORY)
+            } catch (e: Exception) {
+                Result.Error("Failed to fetch stories", e)
+            }
+
+            // Fetch series
+            _series.value = Result.Loading
+            _series.value = try {
+                fetchSectionDataUseCase(characterId, MarvelSectionType.SERIES)
+            } catch (e: Exception) {
+                Result.Error("Failed to fetch series", e)
+            }
         }
     }
+//
 
 }

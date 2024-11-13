@@ -4,9 +4,10 @@ import com.example.domain.model.BaseResponse
 import com.example.domain.model.MarvelSectionType
 import com.example.domain.model.SectionItem
 import com.example.domain.repo.MarvelCharactersRepo
+import com.example.domain.model.Result
 
 class FetchSectionDataUseCase (private val marvelCharactersRepo: MarvelCharactersRepo) {
-    suspend operator fun invoke(characterId: Int, type: MarvelSectionType): BaseResponse<SectionItem> {
+    suspend operator fun invoke(characterId: Int, type: MarvelSectionType): Result<BaseResponse<SectionItem>> {
         return when (type) {
             MarvelSectionType.COMIC -> marvelCharactersRepo.getComics(characterId)
             MarvelSectionType.EVENT -> marvelCharactersRepo.getEvents(characterId)

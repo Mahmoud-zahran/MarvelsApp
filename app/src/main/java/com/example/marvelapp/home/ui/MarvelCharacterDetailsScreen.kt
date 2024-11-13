@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import com.example.domain.model.MarvelSectionType
 import com.example.domain.model.SectionItem
 import com.example.marvelapp.R
 import com.example.marvelapp.home.viewmodel.MarvelCharactersViewModel
+import com.example.domain.model.Result
 
 @Composable
 fun MarvelCharacterDetailsScreen(
@@ -67,9 +69,7 @@ fun MarvelCharacterDetailsScreen(
     ) {
         // Main content of the screen (image + details)
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-//                .padding(top = 56.dp) // Padding to avoid overlap with back arrow
+            modifier = Modifier.fillMaxSize()
         ) {
             // Display character thumbnail (image)
             item {
@@ -87,9 +87,7 @@ fun MarvelCharacterDetailsScreen(
                         .build(),
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth()
-//                        .aspectRatio(16 / 9f) // Use aspect ratio to keep height dynamic
-//                        .fillMaxWidth()
-                        .height(300.dp), // Set height to make the image go to the edge
+                        .height(300.dp),
                     contentScale = ContentScale.FillBounds
                 )
             }
@@ -116,75 +114,129 @@ fun MarvelCharacterDetailsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-
             }
 
-            // Display sections (Comics, Events, etc.)
+            // Handle comics result
             comics.value?.let { comicResponse ->
-                if (comicResponse.data.results.isNotEmpty()) {
-                    @Suppress("NAME_SHADOWING") val comics = comicResponse.data.results
-                    item {
-                        SubCollectionSection(title = "COMICS",    characterId,
-                            navController,MarvelSectionType.COMIC, items = comics)
+                when (comicResponse) {
+                    is Result.Loading -> {
+                        item { LoadingItem() }
+                    }
+                    is Result.Success -> {
+                        val comicsData = comicResponse.data.data.results
+                        if (comicsData.isNotEmpty()) {
+                            item {
+                                SubCollectionSection(
+                                    title = "COMICS", characterId, navController, MarvelSectionType.COMIC, items = comicsData
+                                )
+                            }
+                        }
+                    }
+                    is Result.Error -> {
+                        item {
+                            ErrorItem(message = comicResponse.message)
+                        }
                     }
                 }
             }
+
+            // Handle series result
             series.value?.let { seriesResponse ->
-                if (seriesResponse.data.results.isNotEmpty()) {
-                    @Suppress("NAME_SHADOWING") val series = seriesResponse.data.results
-                    item {
-                        SubCollectionSection(title = "Series",characterId, navController,MarvelSectionType.SERIES,items = series)
+                when (seriesResponse) {
+                    is Result.Loading -> {
+                        item { LoadingItem() }
+                    }
+                    is Result.Success -> {
+                        val seriesData = seriesResponse.data.data.results
+                        if (seriesData.isNotEmpty()) {
+                            item {
+                                SubCollectionSection(
+                                    title = "SERIES", characterId, navController, MarvelSectionType.SERIES, items = seriesData
+                                )
+                            }
+                        }
+                    }
+                    is Result.Error -> {
+                        item {
+                            ErrorItem(message = seriesResponse.message)
+                        }
                     }
                 }
             }
+
+            // Handle stories result
             stories.value?.let { storiesResponse ->
-                if (storiesResponse.data.results.isNotEmpty()) {
-                    @Suppress("NAME_SHADOWING") val stories = storiesResponse.data.results
-                    item {
-                        SubCollectionSection(title = "Stories",characterId, navController,MarvelSectionType.STORY,items = stories)
+                when (storiesResponse) {
+                    is Result.Loading -> {
+                        item { LoadingItem() }
+                    }
+                    is Result.Success -> {
+                        val storiesData = storiesResponse.data.data.results
+                        if (storiesData.isNotEmpty()) {
+                            item {
+                                SubCollectionSection(
+                                    title = "STORIES", characterId, navController, MarvelSectionType.STORY, items = storiesData
+                                )
+                            }
+                        }
+                    }
+                    is Result.Error -> {
+                        item {
+                            ErrorItem(message = storiesResponse.message)
+                        }
                     }
                 }
             }
+
+            // Handle events result
             events.value?.let { eventsResponse ->
-                if (eventsResponse.data.results.isNotEmpty()) {
-                    @Suppress("NAME_SHADOWING") val events = eventsResponse.data.results
-                    item {
-                        SubCollectionSection(title = "Events",characterId,navController,MarvelSectionType.EVENT, items = events)
+                when (eventsResponse) {
+                    is Result.Loading -> {
+                        item { LoadingItem() }
+                    }
+                    is Result.Success -> {
+                        val eventsData = eventsResponse.data.data.results
+                        if (eventsData.isNotEmpty()) {
+                            item {
+                                SubCollectionSection(
+                                    title = "EVENTS", characterId, navController, MarvelSectionType.EVENT, items = eventsData
+                                )
+                            }
+                        }
+                    }
+                    is Result.Error -> {
+                        item {
+                            ErrorItem(message = eventsResponse.message)
+                        }
                     }
                 }
             }
+
+            // Related links section
             item {
                 Column(modifier = Modifier.padding(start = 8.dp, top = 16.dp, end = 8.dp)) {
                     Text("RELATED LINKS", style = MaterialTheme.typography.labelSmall, color = Color.Red)
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(    modifier = Modifier.fillMaxWidth(), // Fill the row to the maximum width
-                        horizontalArrangement = Arrangement.SpaceBetween, // Space out the items within the row
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Details", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Back")
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Arrow Right")
                     }
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(    modifier = Modifier.fillMaxWidth(), // Fill the row to the maximum width
-                        horizontalArrangement = Arrangement.SpaceBetween, // Space out the items within the row
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Wiki", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Back")
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Arrow Right")
                     }
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(    modifier = Modifier.fillMaxWidth(), // Fill the row to the maximum width
-                        horizontalArrangement = Arrangement.SpaceBetween, // Space out the items within the row
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Comiclink", style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Back")
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Arrow Right")
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
-                Spacer(modifier = Modifier.height(100.dp))
-
             }
 
         }
@@ -193,13 +245,32 @@ fun MarvelCharacterDetailsScreen(
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp) // Adjust padding for correct placement
-                .align(Alignment.TopStart) // Align the back arrow to the top start (top-left)
+                .padding(start = 16.dp, top = 16.dp)
+                .align(Alignment.TopStart)
         ) {
             Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Back")
         }
     }
 }
+
+@Composable
+fun LoadingItem() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+fun ErrorItem(message: String?) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = message ?: "An error occurred.",
+            color = Color.Red,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
 
 @Composable
 fun SubCollectionSection(

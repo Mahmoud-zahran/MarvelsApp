@@ -1,6 +1,7 @@
 package com.example.marvelapp.home.ui
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,15 +19,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.domain.model.BaseResponse
 import com.example.marvelapp.ui.theme.MarvelAppTheme
 import com.example.marvelapp.home.viewmodel.MarvelCharactersViewModel
+import com.example.domain.model.Result
+import com.example.domain.model.SectionItem
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun MarvelAppScreen(
@@ -34,14 +40,15 @@ fun MarvelAppScreen(
     windowSize: WindowSizeClass,
     navController: NavController
 ) {
-    val marvelCharactersState = viewModel.marvelCharacters.collectAsState(initial = null)
+    val marvelCharactersState = viewModel.marvelCharacters.collectAsState()
+    val comicsState = viewModel.comics.collectAsState()
+    val eventsState = viewModel.events.collectAsState()
+    val storiesState = viewModel.stories.collectAsState()
+    val seriesState = viewModel.series.collectAsState()
+
     // Get the current navigation destination
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val comics = viewModel.comics.collectAsState(initial = null)
-    val events = viewModel.events.collectAsState(initial = null)
-    val stories = viewModel.stories.collectAsState(initial = null)
-    val series = viewModel.series.collectAsState(initial = null)
     MarvelAppTheme {
         Scaffold(
             topBar = {
@@ -50,148 +57,234 @@ fun MarvelAppScreen(
                 }
             }
         ) { padding ->
-            marvelCharactersState.value?.let { marvelCharacterResponse ->
-                if (marvelCharacterResponse.data.results.isNotEmpty()) {
-                    val characters = marvelCharacterResponse.data.results
-                    // Setting up NavHost for navigation
-                    NavHost(
-                        navController = navController as NavHostController,
-                        startDestination = "home"
-                    ) {
-                        composable("home") {
-                            MarvelCharacterListScreen(
-                                marvelCharacters = characters,
-                                navController = navController,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(padding)
-                            )
-                        }
-                        composable(
-                            "character_details/{characterId}",
-                            arguments = listOf(navArgument("characterId") {
-                                type = NavType.IntType
-                            })
-                        ) { backStackEntry ->
-                            val characterId = backStackEntry.arguments?.getInt("characterId") ?: 0
-                            val character = characters.firstOrNull { it.id == characterId }
-                            character?.let {
-                                MarvelCharacterDetailsScreen(
-                                    it.id,
-                                    marvelCharacter = it,
-                                    navController = navController, viewModel = viewModel
-                                )
-                            }
-                        }
-
-                        composable("comic_images/{comicId}") { backStackEntry ->
-                            comics.value?.let { comic ->
-                                if (comic.data.results.isNotEmpty()) {
-                                    val comics = comic.data.results
-                                    val comicId = backStackEntry.arguments?.getString("comicId")
-                                        ?.toIntOrNull() ?: 0
-                                    val sectionItem = comics.firstOrNull { it.id == comicId }
-
-                                    sectionItem?.let {
-                                        MarvelSectionImagesScreen(
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Handle the characters list state
+                when (val charactersResult = marvelCharactersState.value) {
+                    is Result.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    is Result.Success -> {
+                        if (charactersResult.data.data.results.isNotEmpty()) {
+                            NavHost(
+                                navController = navController as NavHostController,
+                                startDestination = "home"
+                            ) {
+                                composable("home") {
+                                    MarvelCharacterListScreen(
+                                        marvelCharacters = charactersResult.data.data.results,
+                                        navController = navController,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                                composable(
+                                    "character_details/{characterId}",
+                                    arguments = listOf(navArgument("characterId") { type = NavType.IntType })
+                                ) { backStackEntry ->
+                                    val characterId = backStackEntry.arguments?.getInt("characterId") ?: 0
+                                    val character = charactersResult.data.data.results.firstOrNull { it.id == characterId }
+                                    character?.let {
+                                        MarvelCharacterDetailsScreen(
+                                            it.id,
+                                            marvelCharacter = it,
                                             navController = navController,
-                                            sectionItem = it
+                                            viewModel = viewModel
                                         )
                                     }
                                 }
-                            }
-                        }
 
-
-                        composable("event_images/{eventId}") { backStackEntry ->
-                            events.value?.let { event ->
-                                if (event.data.results.isNotEmpty()) {
-                                    val events = event.data.results
-                                    val eventId = backStackEntry.arguments?.getString("eventId")
-                                        ?.toIntOrNull() ?: 0
-                                    val sectionItem = events.firstOrNull { it.id == eventId }
-
-                                    sectionItem?.let {
-                                        MarvelSectionImagesScreen(
-                                            navController = navController,
-                                            sectionItem = it
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-
-                        composable("series_images/{seriesId}") { backStackEntry ->
-                            series.value?.let { series ->
-                                if (series.data.results.isNotEmpty()) {
-                                    val serieses = series.data.results
-                                    val seriesId = backStackEntry.arguments?.getString("seriesId")
-                                        ?.toIntOrNull() ?: 0
-                                    val sectionItem = serieses.firstOrNull { it.id == seriesId }
-
-                                    sectionItem?.let {
-                                        MarvelSectionImagesScreen(
-                                            navController = navController,
-                                            sectionItem = it
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        composable("story_images/{storyId}") { backStackEntry ->
-                            stories.value?.let { story ->
-                                if (story.data.results.isNotEmpty()) {
-                                    val stories = story.data.results
-                                    val storyId = backStackEntry.arguments?.getString("storyId")
-                                        ?.toIntOrNull() ?: 0
-                                    val sectionItem = stories.firstOrNull { it.id == storyId }
-
-                                    sectionItem?.let {
-                                        MarvelSectionImagesScreen(
-                                            navController = navController,
-                                            sectionItem = it
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-//                    when (windowSize.widthSizeClass) {
-//                        WindowWidthSizeClass.Compact, WindowWidthSizeClass.Expanded -> {
-//                            MarvelCharacterListScreen(
+                                // Section navigation composables
+//                                composable("comic_images/{comicId}") { backStackEntry ->
+//                                    handleSectionNavigation(comicsState.value, backStackEntry.arguments?.getInt("comicId"), navController)
+//                                }
+                                composable("comic_images/{comicId}") { backStackEntry ->
+                                    comicsState.value?.let { comic ->
 //
-//                                marvelCharacters = characters,
-//                                navController = navController,
-//                                modifier = Modifier.fillMaxSize().padding(padding)
-//                            )
-//                        }
-//                    }
-                } else {
-                    // Handle empty list case with a centered message
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No characters found.", style = MaterialTheme.typography.bodyLarge)
-
+                                        when (comic) {
+                                            is Result.Loading -> Box(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                            }
+                                            is Result.Success -> {
+                                                val comicId = backStackEntry.arguments?.getString("comicId")
+                                                ?.toIntOrNull() ?: 0
+                                                comic.data.data.results.firstOrNull { it.id == comicId }?.let { sectionItem ->
+                                                    MarvelSectionImagesScreen(navController = navController, sectionItem = sectionItem)
+                                                }
+                                            }
+                                            is Result.Error -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        text = "Error: ${comic.message}",
+                                                        modifier = Modifier.align(Alignment.Center),
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        color = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
+                                            else -> {}
+                                        }
+                                    }
+                                }
+                                composable("event_images/{eventId}") { backStackEntry ->
+                                eventsState.value?.let { event ->
+//
+                                        when (event) {
+                                            is Result.Loading -> Box(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                            }
+                                            is Result.Success -> {
+                                                val eventId = backStackEntry.arguments?.getString("eventId")
+                                                    ?.toIntOrNull() ?: 0
+                                                event.data.data.results.firstOrNull { it.id == eventId }?.let { sectionItem ->
+                                                    MarvelSectionImagesScreen(navController = navController, sectionItem = sectionItem)
+                                                }
+                                            }
+                                            is Result.Error -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        text = "Error: ${event.message}",
+                                                        modifier = Modifier.align(Alignment.Center),
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        color = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
+                                            else -> {}
+                                        }
+                                    }
+                                }
+//                                composable("event_images/{eventId}") { backStackEntry ->
+//                                    val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
+//
+//                                    handleSectionNavigation(eventsState.value,eventId, navController)
+//                                }
+                                composable("series_images/{seriesId}") { backStackEntry ->
+                                    seriesState.value?.let { series ->
+//
+                                        when (series) {
+                                            is Result.Loading -> Box(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                            }
+                                            is Result.Success -> {
+                                                val seriesId = backStackEntry.arguments?.getString("seriesId")
+                                                    ?.toIntOrNull() ?: 0
+                                                series.data.data.results.firstOrNull { it.id == seriesId }?.let { sectionItem ->
+                                                    MarvelSectionImagesScreen(navController = navController, sectionItem = sectionItem)
+                                                }
+                                            }
+                                            is Result.Error -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        text = "Error: ${series.message}",
+                                                        modifier = Modifier.align(Alignment.Center),
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        color = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
+                                            else -> {}
+                                        }
+                                    }
+                                }
+//                                composable("series_images/{seriesId}") { backStackEntry ->
+//                                    val seriesId = backStackEntry.arguments?.getString("seriesId")?.toIntOrNull() ?: 0
+//
+//                                    handleSectionNavigation(seriesState.value, seriesId, navController)
+//                                }
+                                composable("story_images/{storyId}") { backStackEntry ->
+                                    storiesState.value?.let { story ->
+//
+                                        when (story) {
+                                            is Result.Loading -> Box(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                            }
+                                            is Result.Success -> {
+                                                val storyId = backStackEntry.arguments?.getString("storyId")
+                                                    ?.toIntOrNull() ?: 0
+                                                story.data.data.results.firstOrNull { it.id == storyId }?.let { sectionItem ->
+                                                    MarvelSectionImagesScreen(navController = navController, sectionItem = sectionItem)
+                                                }
+                                            }
+                                            is Result.Error -> {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        text = "Error: ${story.message}",
+                                                        modifier = Modifier.align(Alignment.Center),
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        color = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
+                                            else -> {}
+                                        }
+                                    }
+                                }
+//                                composable("story_images/{storyId}") { backStackEntry ->
+//                                    val storyId = backStackEntry.arguments?.getString("storyId")?.toIntOrNull() ?: 0
+//                                    handleSectionNavigation(storiesState.value, storyId, navController)
+//                                }
+                            }
+                        } else {
+                            Text("No characters found.", modifier = Modifier.align(Alignment.Center), style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
+                    is Result.Error -> {
+                        Text(
+                            text = "Error: ${charactersResult.message}",
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    null -> TODO()
                 }
-            } ?: run {
-                // Center-aligned CircularProgressIndicator
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-//                CircularProgressIndicator(modifier = Modifier.padding(padding))
             }
         }
     }
 }
+
+//@Composable
+//private fun handleSectionNavigation(
+//    result: Result<BaseResponse<SectionItem>>?,
+//    itemId: Int?,
+//    navController: NavHostController
+//) {
+//    when (result) {
+//        is Result.Loading -> Box(
+//            modifier = Modifier.fillMaxSize()
+//        ) {
+//            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//        }
+//        is Result.Success -> {
+//            result.data.data.results.firstOrNull { it.id == itemId }?.let { sectionItem ->
+//                MarvelSectionImagesScreen(navController = navController, sectionItem = sectionItem)
+//            }
+//        }
+//        is Result.Error -> {
+//            Box(
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                Text(
+//                    text = "Error: ${result.message}",
+//                    modifier = Modifier.align(Alignment.Center),
+//                    style = MaterialTheme.typography.bodyLarge,
+//                    color = MaterialTheme.colorScheme.error
+//                )
+//            }
+//        }
+//        else -> {}
+//    }
+//}
