@@ -38,10 +38,14 @@ fun MarvelAppScreen(
     // Get the current navigation destination
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
+    val comics = viewModel.comics.collectAsState(initial = null)
+    val events = viewModel.events.collectAsState(initial = null)
+    val stories = viewModel.stories.collectAsState(initial = null)
+    val series = viewModel.series.collectAsState(initial = null)
     MarvelAppTheme {
         Scaffold(
             topBar = {
-                if (currentDestination != "character_details/{characterId}") {
+                if (currentDestination == "home") {
                     MarvelTopBar()
                 }
             }
@@ -72,10 +76,85 @@ fun MarvelAppScreen(
                             val characterId = backStackEntry.arguments?.getInt("characterId") ?: 0
                             val character = characters.firstOrNull { it.id == characterId }
                             character?.let {
-                                MarvelCharacterDetailsScreen(it.id,
+                                MarvelCharacterDetailsScreen(
+                                    it.id,
                                     marvelCharacter = it,
                                     navController = navController, viewModel = viewModel
                                 )
+                            }
+                        }
+
+                        composable("comic_images/{comicId}") { backStackEntry ->
+                            comics.value?.let { comic ->
+                                if (comic.data.results.isNotEmpty()) {
+                                    val comics = comic.data.results
+                                    val comicId = backStackEntry.arguments?.getString("comicId")
+                                        ?.toIntOrNull() ?: 0
+                                    val sectionItem = comics.firstOrNull { it.id == comicId }
+
+                                    sectionItem?.let {
+                                        MarvelSectionImagesScreen(
+                                            navController = navController,
+                                            sectionItem = it
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+
+                        composable("event_images/{eventId}") { backStackEntry ->
+                            events.value?.let { event ->
+                                if (event.data.results.isNotEmpty()) {
+                                    val events = event.data.results
+                                    val eventId = backStackEntry.arguments?.getString("eventId")
+                                        ?.toIntOrNull() ?: 0
+                                    val sectionItem = events.firstOrNull { it.id == eventId }
+
+                                    sectionItem?.let {
+                                        MarvelSectionImagesScreen(
+                                            navController = navController,
+                                            sectionItem = it
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+
+                        composable("series_images/{seriesId}") { backStackEntry ->
+                            series.value?.let { series ->
+                                if (series.data.results.isNotEmpty()) {
+                                    val serieses = series.data.results
+                                    val seriesId = backStackEntry.arguments?.getString("seriesId")
+                                        ?.toIntOrNull() ?: 0
+                                    val sectionItem = serieses.firstOrNull { it.id == seriesId }
+
+                                    sectionItem?.let {
+                                        MarvelSectionImagesScreen(
+                                            navController = navController,
+                                            sectionItem = it
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        composable("story_images/{storyId}") { backStackEntry ->
+                            stories.value?.let { story ->
+                                if (story.data.results.isNotEmpty()) {
+                                    val stories = story.data.results
+                                    val storyId = backStackEntry.arguments?.getString("storyId")
+                                        ?.toIntOrNull() ?: 0
+                                    val sectionItem = stories.firstOrNull { it.id == storyId }
+
+                                    sectionItem?.let {
+                                        MarvelSectionImagesScreen(
+                                            navController = navController,
+                                            sectionItem = it
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

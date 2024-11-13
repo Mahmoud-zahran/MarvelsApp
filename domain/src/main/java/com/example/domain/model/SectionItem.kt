@@ -77,8 +77,5 @@ data class Prices(
 
 )
 
-data class Image(
-    val extension: String,
-    val path: String
-)
+
 
