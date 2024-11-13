@@ -45,6 +45,7 @@ fun MarvelAppScreen(
     val eventsState = viewModel.events.collectAsState()
     val storiesState = viewModel.stories.collectAsState()
     val seriesState = viewModel.series.collectAsState()
+    val isLoading = viewModel.isLoading.collectAsState()
 
     // Get the current navigation destination
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -71,6 +72,8 @@ fun MarvelAppScreen(
                                     MarvelCharacterListScreen(
                                         marvelCharacters = charactersResult.data.data.results,
                                         navController = navController,
+                                        loadNextPage = { viewModel.loadNextPage() },
+                                        isLoading = isLoading.value,
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.domain.model.Result
+import kotlinx.coroutines.flow.asStateFlow
 
 const val TAG ="MarvelCharactersViewModel"
 
@@ -26,6 +27,12 @@ class MarvelCharactersViewModel @Inject constructor(
 
     private val _marvelCharacters: MutableStateFlow<Result<BaseResponse<MarvelCharacter>>?> = MutableStateFlow(null)
     val marvelCharacters: StateFlow<Result<BaseResponse<MarvelCharacter>>?> = _marvelCharacters
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private var currentPage = 1
+
     private val _comics = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
     val comics: StateFlow<Result<BaseResponse<SectionItem>>?> = _comics
 
@@ -37,6 +44,20 @@ class MarvelCharactersViewModel @Inject constructor(
 
     private val _series = MutableStateFlow<Result<BaseResponse<SectionItem>>?>(null)
     val series: StateFlow<Result<BaseResponse<SectionItem>>?> = _series
+
+    fun loadNextPage() {
+        if (_isLoading.value) return
+        _isLoading.value = true
+
+        // Fetch the next page of characters
+        // Update the _marvelCharacters and currentPage accordingly
+        // You can use your API client to load data here, for example:
+        getMarvelCharacters()
+        _marvelCharacters.value = _marvelCharacters.value
+        currentPage++
+
+        _isLoading.value = false
+    }
 
     fun getMarvelCharacters(){
         viewModelScope.launch {
