@@ -24,6 +24,7 @@ class MarvelCharactersViewModel @Inject constructor(
     fun getMarvelCharacters(){
         viewModelScope.launch{
             try {
+
                 _marvelCharacters.value = getMarvelCharactersUseCase()
                 Log.d(TAG, "getMarvelCharacters: "+_marvelCharacters.value.toString())
             } catch (e: Exception){
