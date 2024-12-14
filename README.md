@@ -47,13 +47,20 @@ here's the **screens** output of the code
 
 
 
+**Marvel Characters**
 
-![Screenshot_20241113_161339_MarvelApp](https://github.com/user-attachments/assets/f7735468-c6b0-4f4e-9f2c-0423e61e8976)
+<img width="350" alt="MarvelApp 1" src="https://github.com/user-attachments/assets/f7735468-c6b0-4f4e-9f2c-0423e61e8976">
 
-![Screenshot_20241113_161227_MarvelApp](https://github.com/user-attachments/assets/31e3a748-638c-4a3d-82a6-06fcf74eeaee)
+**Marvel Character Details**
 
-![Screenshot_20241113_161242_MarvelApp](https://github.com/user-attachments/assets/f560653e-a00c-447e-93be-6a7ce60d0b8c)
+<img width="350" alt="MarvelApp 1" src="https://github.com/user-attachments/assets/31e3a748-638c-4a3d-82a6-06fcf74eeaee">
 
-![Screenshot_20241113_161250_MarvelApp](https://github.com/user-attachments/assets/94e52c69-500e-44b7-87d6-c648341a8363)
 
-![Screenshot_20241113_161302_MarvelApp](https://github.com/user-attachments/assets/a578c906-d969-49fb-a5d9-fb8410cdfde1)
+<img width="350" alt="MarvelApp 1" src="https://github.com/user-attachments/assets/f560653e-a00c-447e-93be-6a7ce60d0b8c">
+
+**Marvel Book openned**
+
+<img width="350" alt="MarvelApp 1" src="https://github.com/user-attachments/assets/94e52c69-500e-44b7-87d6-c648341a8363">
+<img width="350" alt="MarvelApp 1" src="https://github.com/user-attachments/assets/a578c906-d969-49fb-a5d9-fb8410cdfde1">
+
+
