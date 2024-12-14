@@ -10,7 +10,6 @@ using the best practices combining the following techs to achieve the goal of th
 * Applying Dark and Light themes.
 * Retrofit
 * Coil for loading images
-* Navigation compose to navigate between screens using deep linking
 * Hilt for Dependency Injection
 
 **App Description**
