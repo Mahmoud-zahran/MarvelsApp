@@ -6,6 +6,8 @@ using the best practices combining the following techs to achieve the goal of th
 * MVVM with Kotlin
 * JetPack Compose with material design
 * Kotlin Coroutines
+* Navigation compose to navigate between screens using deep linking.
+* Applying Dark and Light themes.
 * Retrofit
 * Coil for loading images
 * Navigation compose to navigate between screens using deep linking
